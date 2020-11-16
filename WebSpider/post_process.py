@@ -23,10 +23,13 @@ def sent_words_list(sentfilepath):
     return  sent_words
 sent_words = sent_words_list('data/all_sentment.txt')
 
-file = 'data/douban.csv'
-with open(file,'r',encoding='utf-8') as csvfile:
+file = 'guobao/all_comment.csv'
+with open(file,'r',encoding='gbk') as csvfile:
     reader = csv.reader(csvfile)
     column = [row[2] for row in reader ]
+
+
+
 
 #获取所有分词结果
 seg_words = []
@@ -42,6 +45,8 @@ for word in seg_words:
         if word != '\t':
             seg_words_deleted.append(word)
 
+all_words_without_stopword_num = len(seg_words_deleted)
+
 #去除情感词
 seg_words_deleted_sent = []
 coment_sent_words = []
@@ -51,7 +56,7 @@ for word in seg_words_deleted:
             seg_words_deleted_sent.append(word)
     else:
         coment_sent_words.append(word)
-
+all_sent_num = len(coment_sent_words)
 #统计词频
 word_num = {}
 afte_delete = []
@@ -73,13 +78,13 @@ sent_items = list(sent_num.items())
 sent_items.sort(key=lambda x:x[1],reverse=True)
 
 #存储词频
-with open('data/word_num_delete_sent.txt','w',encoding='utf-8') as fp:
+with open('guobao/result/word_num_delete_sent.txt','w',encoding='utf-8') as fp:
     for item in items:
         fp.write(str(item[0]) + '   '+str(item[1]))
         #fp.write(item[1])
         fp.write('\n')
 
-with open('data/coment_sent_num.txt','w',encoding='utf-8') as fp:
+with open('guobao/result/coment_sent_num.txt','w',encoding='utf-8') as fp:
     for item in sent_items:
         fp.write(str(item[0]) + '   '+str(item[1]))
         #fp.write(item[1])
@@ -95,16 +100,18 @@ mood_without_stop = list(mood)
 
 #生成词云
 sent_stop_words = ['完','玩','想','讲','中','真','说']
+org_stop_words = ['真的','一名','','','','']
 background = imread('data/timg.jpg')
 wc = wordcloud.WordCloud(background_color="white",
                          mask=background,
-                         stopwords=sent_stop_words,
+                         stopwords=org_stop_words,
                          max_words=size,
                          font_path='C:\Windows\Fonts\simkai.ttf')
-word_list = ",".join(coment_sent_words)
+word_list = ",".join(seg_words_deleted_sent)
 myword = wc.generate(word_list)
-wc.to_file('data/coment_sent_numt.jpg')
+wc.to_file('guobao/result/coment_sent_numt.jpg')
 
+print(all_words_without_stopword_num,all_sent_num)
 #展示词云
 plt.imshow(wc)
 plt.axis('off')
