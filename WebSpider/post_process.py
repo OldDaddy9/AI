@@ -15,21 +15,22 @@ def stop_words_list(stopfilepath):
     stop_words = [line.strip() for line in open(stopfilepath,encoding='utf-8').readlines()]
     return  stop_words
 
-stop_words = stop_words_list('data/allstopwords.txt')
+stop_words = stop_words_list('data/dependens/allstopwords.txt')
 
 #创建情感词表
 def sent_words_list(sentfilepath):
     sent_words = [line.strip() for line in open(sentfilepath,encoding='utf-8').readlines()]
     return  sent_words
-sent_words = sent_words_list('data/all_sentment.txt')
+# post_sent_words = sent_words_list('data/dependens/postive.txt')
+# neg_sent_words = sent_words_list('data/dependens/negtive.txt')
+post_sent_words = sent_words_list('data/process_sentment/postive.txt')
+neg_sent_words = sent_words_list('data/process_sentment/negtive.txt')
+sent_words = post_sent_words + neg_sent_words
 
-file = 'guobao/all_comment.csv'
+file = 'data/all_comment1.csv'
 with open(file,'r',encoding='gbk') as csvfile:
     reader = csv.reader(csvfile)
     column = [row[2] for row in reader ]
-
-
-
 
 #获取所有分词结果
 seg_words = []
@@ -44,9 +45,7 @@ for word in seg_words:
     if word not in stop_words:
         if word != '\t':
             seg_words_deleted.append(word)
-
 all_words_without_stopword_num = len(seg_words_deleted)
-
 #去除情感词
 seg_words_deleted_sent = []
 coment_sent_words = []
@@ -78,13 +77,13 @@ sent_items = list(sent_num.items())
 sent_items.sort(key=lambda x:x[1],reverse=True)
 
 #存储词频
-with open('guobao/result/word_num_delete_sent.txt','w',encoding='utf-8') as fp:
+with open('data/result/word_num_delete_sent.txt','w',encoding='utf-8') as fp:
     for item in items:
         fp.write(str(item[0]) + '   '+str(item[1]))
         #fp.write(item[1])
         fp.write('\n')
 
-with open('guobao/result/coment_sent_num.txt','w',encoding='utf-8') as fp:
+with open('data/result/coment_sent_num.txt','w',encoding='utf-8') as fp:
     for item in sent_items:
         fp.write(str(item[0]) + '   '+str(item[1]))
         #fp.write(item[1])
@@ -109,8 +108,16 @@ wc = wordcloud.WordCloud(background_color="white",
                          font_path='C:\Windows\Fonts\simkai.ttf')
 word_list = ",".join(seg_words_deleted_sent)
 myword = wc.generate(word_list)
-wc.to_file('guobao/result/coment_sent_numt.jpg')
+wc.to_file('data/result/coment_without_sent_cloud.jpg')
 
+wc1 = wordcloud.WordCloud(background_color="white",
+                         mask=background,
+                         stopwords=sent_stop_words,
+                         max_words=size,
+                         font_path='C:\Windows\Fonts\simkai.ttf')
+word_list1 = ",".join(coment_sent_words)
+myword1 = wc1.generate(word_list1)
+wc1.to_file('data/result/coment_sent_cloud.jpg')
 print(all_words_without_stopword_num,all_sent_num)
 #展示词云
 plt.imshow(wc)
